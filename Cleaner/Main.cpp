@@ -10,8 +10,7 @@ int main()
 {
 
 	DataManager* manager = new DataManager();
-	manager->findFiles();
-	//manager->printData();
+	manager->clean();
 
 
 	return 0;

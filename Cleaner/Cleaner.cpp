@@ -3,7 +3,14 @@
 
 DataProcessor::DataProcessor()
 {
-	
+	RootDirCreator(ROOT_DIR_NAME);
+}
+
+void DataProcessor::RootDirCreator(string root_dir_name_with_full_path)
+{
+	string root_cmd = "mkdir ";
+	root_cmd.append(DATA_DIR + root_dir_name_with_full_path);
+	system(root_cmd.c_str());
 }
 
 DataProcessor::~DataProcessor()
@@ -69,13 +76,85 @@ void DataProcessor::listFilesAndDirs(const string& dir_name)
 	}
 }
 
-void DataProcessor::createDirBasedOnExtension()
+void DataProcessor::createDir(string fileName)
 {
-	if (CreateDirectory(ToLPCWSTR(DATA_DIR), NULL))
-	{
+	string extension_dir(DATA_DIR);
+	extension_dir.append(fileName);
+	//extension_dir.append("_FILE");
+	//cout << extension_dir << endl;
+	dir_creator(extension_dir);
+	extension_dir.clear();
 
+}
+
+void DataProcessor::dir_creator(string file)
+{
+	string dir_cmd = "mkdir ";
+	dir_cmd.append(file);
+	system(dir_cmd.c_str());
+}
+
+void DataProcessor::fileMove(string src, string dst)
+{
+	string move_cmd = "move ";
+	move_cmd.append(src + " ");
+	move_cmd.append(dst);
+	system(move_cmd.c_str());
+}
+
+
+void DataProcessor::findFilesAndMoveToDir(string format)
+{
+	for (auto i : files)
+	{
+		string file_format = i.substr(i.find_last_of(".") + 1);
+		if (file_format == format)
+		{
+			string src = DATA_DIR + "\"" + i + "\"";
+			string dst = DATA_DIR + format;
+			fileMove(src, dst);
+		}
+		else
+		{
+			continue;
+		}
 	}
 }
+
+void DataProcessor::findDirAndMoveToRootDir()
+{
+	for (auto i : dirs)
+	{
+		string src_dir = DATA_DIR;
+		src_dir.append("\"" + i + "\"");
+		string dst_dir = DATA_DIR + ROOT_DIR_NAME;
+		fileMove(src_dir, dst_dir);
+	}
+}
+
+int DataProcessor::createDirBasedOnExtension()
+{
+	int status = 0;
+	if (!ext_list.empty())
+	{
+		for (auto i : ext_list)
+		{
+			cout << i << endl;
+			createDir(i);
+			dirs.push_back(i);
+			findFilesAndMoveToDir(i);
+			findDirAndMoveToRootDir();
+			
+		}
+		status = 1;
+	}
+	else
+	{
+		status = -1;
+	}
+	return status;
+}
+
 
 
 void DataProcessor::files_and_dirs_result(vector<string>& files , vector<string>& dirs)
@@ -93,6 +172,13 @@ void DataProcessor::dirs_result(vector<string>& dirs)
 {
 	dirs = this->dirs;
 }
+
+bool DataProcessor::cleanDirectory()
+{
+	return createDirBasedOnExtension();
+}
+
+//======================================MANAGER INTERFACE==================================
 
 
 
@@ -114,22 +200,25 @@ DataManager::~DataManager()
 
 }
 
-void DataManager::findFiles()
-{
-	dprocess->listFilesAndDirs(DATA_DIR);
-	dprocess->files_result(files);
-}
-
-void DataManager::findDirs()
-{
-	dprocess->listFilesAndDirs(DATA_DIR);
-	dprocess->dirs_result(dirs);
-}	
-
+	
 void DataManager::findFilesAndDirs()
 {
 	dprocess->listFilesAndDirs(DATA_DIR);
 	dprocess->files_and_dirs_result(files , dirs);
+}
+
+void DataManager::clean()
+{
+	findFilesAndDirs();
+	if (dprocess->cleanDirectory())
+	{
+		cout << "Dir has been created" << endl;
+
+	}
+	else
+	{
+		cout << "Error on creating directory" << endl;
+	}
 }
 
 
