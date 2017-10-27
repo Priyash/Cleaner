@@ -8,11 +8,20 @@
 #include<algorithm>
 #include<assert.h>
 #include<cstdlib>
+#include<array>
+#include<ctime>
+#include<ratio>
+#include<chrono>
+
 
 using namespace std;
+using namespace chrono;
 
 const string DATA_DIR = "C:\\Users\\PRIYASH_11\\Desktop\\";
 const string ROOT_DIR_NAME = "ROOT";
+const vector<string>UNSUPPORTED_FORMAT = { "Thumbs.db","desktop.ini" };
+const vector<string>UNSUPPORTED_PREFIX = { "~" };
+
 class IDataProcess
 {
 	
@@ -32,6 +41,7 @@ class DataProcessor : public IDataProcess
 	vector<string>files;
 	vector<string>dirs;
 	vector<string>ext_list;
+	bool status = false;
 private:
 	LPCWSTR ToLPCWSTR(string text);
 	string ToString(WCHAR* text);
@@ -51,7 +61,10 @@ private:
 	void fileMove(string src, string dst);
 	void findDirAndMoveToRootDir();
 	void RootDirCreator(string root_dir_name_with_full_path);
-	
+	bool DataProcessor::DirExist(const string& dir_name, const string& dir_to_search);
+	string getCurrentTimeStamp();
+	string replaceAll(const string& line, const char& search, const char& replace);
+	void renameDir(const string& src, const string& dst);
 };
 
 
